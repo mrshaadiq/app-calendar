@@ -1,0 +1,26 @@
+{
+  "name": "app-calendar-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "build": "tsc --noEmit",
+    "test": "node --test test/*.test.cjs",
+    "deploy:check": "wrangler deploy --dry-run",
+    "deploy": "wrangler deploy"
+  },
+  "engines": {
+    "node": "24"
+  },
+  "dependencies": {
+    "jose": "^6.2.12",
+    "luxon": "^3.7.2"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261006.1",
+    "@types/luxon": "^3.7.6",
+    "esbuild": "^0.28.1",
+    "typescript": "~6.0.3",
+    "wrangler": "^4.147.0"
+  }
+}

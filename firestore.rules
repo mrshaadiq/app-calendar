@@ -1,0 +1,77 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function owns(userId) {
+      return request.auth != null
+        && request.auth.uid == userId;
+    }
+
+    match /users/{userId} {
+      allow create, read, update, delete: if owns(userId);
+
+      match /schedules/{scheduleId} {
+        allow read: if owns(userId);
+        allow create: if owns(userId)
+          && request.resource.data.userId == userId
+          && request.resource.data.source in ['manual', 'google']
+          && request.resource.data.isMandatory == true
+          && request.resource.data.title is string
+          && request.resource.data.startTime is timestamp
+          && request.resource.data.endTime is timestamp
+          && request.resource.data.endTime > request.resource.data.startTime;
+        allow update: if owns(userId)
+          && request.resource.data.source == resource.data.source
+          && request.resource.data.userId == userId
+          && request.resource.data.isMandatory == true
+          && request.resource.data.title is string
+          && request.resource.data.startTime is timestamp
+          && request.resource.data.endTime is timestamp
+          && request.resource.data.endTime > request.resource.data.startTime;
+        allow delete: if owns(userId) && resource.data.source == 'manual';
+      }
+
+      match /tasks/{taskId} {
+        allow read: if owns(userId);
+        allow create: if owns(userId)
+          && request.resource.data.userId == userId
+          && request.resource.data.status == 'pending'
+          && request.resource.data.scheduledStartTime == null
+          && request.resource.data.scheduledEndTime == null
+          && request.resource.data.title is string
+          && request.resource.data.deadline is timestamp
+          && request.resource.data.estimatedDurationMinutes is int
+          && request.resource.data.estimatedDurationMinutes > 0;
+        allow update: if owns(userId)
+          && resource.data.userId == userId
+          && request.resource.data.userId == userId
+          && request.resource.data.title == resource.data.title
+          && request.resource.data.deadline == resource.data.deadline
+          && request.resource.data.estimatedDurationMinutes == resource.data.estimatedDurationMinutes
+          && request.resource.data.status in ['pending', 'scheduled', 'completed', 'cancelled', 'unscheduled']
+          && (request.resource.data.scheduledStartTime == null ||
+              request.resource.data.scheduledStartTime is timestamp)
+          && (request.resource.data.scheduledEndTime == null ||
+              request.resource.data.scheduledEndTime is timestamp);
+        allow delete: if false;
+      }
+
+      match /schedulingRuns/{runId} {
+        allow read: if owns(userId);
+        allow create: if owns(userId)
+          && request.resource.data.userId == userId
+          && request.resource.data.state == 'preview';
+        allow update: if owns(userId)
+          && resource.data.userId == userId
+          && request.resource.data.userId == userId
+          && ((resource.data.state == 'preview' && request.resource.data.state == 'applied') ||
+              (resource.data.state == 'applied' && request.resource.data.state == 'undone'));
+        allow delete: if false;
+      }
+    }
+
+    match /calendarConnections/{userId} {
+      allow read, write: if false;
+    }
+  }
+}

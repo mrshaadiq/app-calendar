@@ -1,0 +1,23 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "app-calendar-api",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-10-06",
+	"workers_dev": true,
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "app-calendar-tokens",
+			"database_id": "d7d13ea6-28c9-4619-b969-8bd9c2c51d6a",
+			"remote": true
+		}
+	],
+	"secrets": {
+		"required": [
+			"FIREBASE_PROJECT_ID",
+			"GOOGLE_CLIENT_ID",
+			"GOOGLE_CLIENT_SECRET",
+			"TOKEN_ENCRYPTION_KEY"
+		]
+	}
+}
